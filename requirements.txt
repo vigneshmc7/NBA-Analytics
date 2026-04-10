@@ -1,0 +1,7 @@
+jupyterlab>=4.0
+ipykernel>=6.0
+duckdb>=1.1
+pandas>=2.0
+numpy>=1.26
+matplotlib>=3.8
+kagglehub>=0.3

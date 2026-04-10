@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local tool state
+.codex
+
+# Editor / OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Windows metadata artifacts
+*:Zone.Identifier
+~$*.pptx
+~$*.ppt
+
+# Environment files
+.env
+.env.*
+
+# Local databases
+*.duckdb
+*.duckdb.wal
+
+# Local data and generated outputs
+data/*
+!data/.gitkeep
