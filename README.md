@@ -1,13 +1,11 @@
 # NBA Analytics
 
-This project analyzes historical NBA team and player performance with a local DuckDB warehouse built from Kaggle data.
+This project builds a local DuckDB warehouse from historical NBA box-score data and uses it to answer four questions:
 
-## Scope
-
-- team-level differences between wins and losses
-- recent team ranking since 2024, with a focused Thunder profile
-- historical player benchmarks by role
-- recent active player tiers and rankings against those historical standards
+- What team statistics separate wins from losses?
+- How does Thunder's recent profile compare with those league-wide winning patterns?
+- What do historical player standards look like for different on-court roles?
+- How do current active players compare with those historical standards?
 
 ## Data
 
@@ -15,11 +13,17 @@ Source dataset:
 
 - Kaggle: `eoinamoore/historical-nba-data-and-player-box-scores`
 
-This project uses a local DuckDB database. The source CSV files can be downloaded with `kagglehub` or placed manually in `data/`.
+The raw CSV files are not stored in the repo. They can be downloaded inside the build notebook with `kagglehub` or placed manually in a local `data/` folder.
 
-## Local Build
+## Workflow
 
-A successful local build produced:
+The project is notebook-first:
+
+1. [01_build_database.ipynb](notebooks/01_build_database.ipynb) loads the CSV files, cleans key fields, and builds the DuckDB star schema.
+2. [02_validation.ipynb](notebooks/02_validation.ipynb) runs sanity checks on the local warehouse.
+3. [03_analysis.ipynb](notebooks/03_analysis.ipynb) produces the tables and figures used in the project.
+
+On the current local build, the warehouse contains:
 
 - `1,666,760` rows in `player_stats_fact`
 - `146,318` rows in `team_stats_fact`
@@ -29,12 +33,12 @@ A successful local build produced:
 
 ## Method
 
-- Historical benchmark pool: player-seasons with at least `750` minutes and `30` games
-- Role assignment: inferred `Creator`, `Wing`, and `Big` roles from box-score production
-- Benchmark stats: `Points / 36`, `Assists / 36`, `3P Made / 36`, `Steals / 36`, `Rebounds / 36`, and `Blocks / 36`
-- Tier cutoffs: `50th`, `75th`, and `95th` percentiles within each role
-- Recent active-player pool: players who appeared in calendar years `2024` or `2025`, using each player's latest qualified season from the last three NBA seasons
-- Current-player qualification: latest qualified season with at least `1000` minutes and `30` games
+- Historical player benchmarks are built at the `player-season` level with at least `750` minutes played and `30` games.
+- `Per 36` means a stat is scaled to 36 minutes played. For example, `Points per 36 min` estimates how many points a player would score over 36 minutes of court time.
+- Player roles are inferred from box-score production and grouped as `Creator`, `Wing`, or `Big`.
+- The benchmark uses `Points`, `Assists`, `3P Made`, `Steals`, `Rebounds`, and `Blocks`, all measured on a per-36-minute basis.
+- Tier levels `50`, `75`, and `95` correspond to the 50th, 75th, and 95th percentile benchmark within a role. `Low` means the player stays below the role median.
+- The recent active-player pool includes players who appeared during calendar years `2024` or `2025`, using each player's latest qualified season from the last three NBA seasons.
 
 ## Visuals
 
@@ -42,25 +46,25 @@ A successful local build produced:
 
 ![Winning Drivers](images/winning-drivers.png)
 
-Compares team-level counting stats and shooting percentages in wins and losses.
+League-wide averages for wins and losses. This chart shows which team box-score areas move most clearly with winning.
 
 ### Thunder Profile
 
 ![Thunder Profile](images/thunder-profile.png)
 
-Ranks recent teams by win rate since 2024 and compares Thunder's winning profile to historical win and loss averages.
+Recent team ranking since 2024, followed by a Thunder case study against the historical win and loss averages from the first visual.
 
 ### Historical Role Benchmarks
 
 ![Historical Role Benchmarks](images/historical-role-benchmarks.png)
 
-Shows the `50th`, `75th`, and `95th` percentile benchmarks for key player stats within each role.
+Historical percentile standards for the main player metrics within each inferred role.
 
 ### Recent Active Player Tiers
 
 ![Recent Active Player Tiers](images/active-role-tiers.png)
 
-Shows the distribution of recent active players across `Low`, `50`, `75`, and `95` overall tiers by role.
+Distribution of the recent active-player pool across the historical role tiers.
 
 ## Files
 
@@ -70,7 +74,6 @@ README.md
 requirements.txt
 .gitignore
 notebooks/
-scripts/
 images/
 ```
 
@@ -84,38 +87,25 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Build the local DuckDB database
+### 2. Run the notebooks in order
 
-If the NBA CSV files are not already in `data/`, download them and build the database:
+Open Jupyter Lab or Jupyter Notebook and run:
 
-```bash
-python scripts/build_local_duckdb.py --download --force
-```
+- [01_build_database.ipynb](notebooks/01_build_database.ipynb)
+- [02_validation.ipynb](notebooks/02_validation.ipynb)
+- [03_analysis.ipynb](notebooks/03_analysis.ipynb)
 
-If the CSV files already exist in `data/`, build the database directly:
+In the build notebook:
 
-```bash
-python scripts/build_local_duckdb.py --force
-```
+- set `DOWNLOAD_FROM_KAGGLE = True` if you want the notebook to download the source CSV files
+- leave it as `False` if you already placed the CSV files in a local `data/` folder
 
-This creates `data/nba_analytics.duckdb`.
-
-### 3. Run the notebooks
-
-- [`notebooks/01_build_database.ipynb`](notebooks/01_build_database.ipynb)
-- [`notebooks/02_validation.ipynb`](notebooks/02_validation.ipynb)
-- [`notebooks/03_analysis.ipynb`](notebooks/03_analysis.ipynb)
-
-### 4. Generate the visual files
-
-```bash
-python scripts/generate_visuals.py
-```
+The build notebook creates `data/nba_analytics.duckdb`. The analysis notebook saves the chart files into `images/`.
 
 ## Notes
 
-- The current workflow uses DuckDB only.
-- The `data/` folder is created locally by the build step and is not tracked in git.
-- Team-level results are more stable than player-position results built from raw source flags.
-- The player benchmark is based on box-score production, not possession-level impact measures.
-- Historical team naming variation and some unresolved fact links still exist in the local build.
+- The project uses DuckDB only. There is no separate database server setup.
+- The local `data/` folder is created during the build step and is ignored by git.
+- Team-level results are more stable than any analysis built directly from the raw source position flags.
+- The player benchmark is a box-score model. It is not a possession-based impact model.
+- Historical team naming variation and some unresolved fact links still remain in the local build.
