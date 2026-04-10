@@ -27,8 +27,6 @@ A successful local build produced:
 - `51` team dimension rows
 - `73,350` games
 
-Validation details are in [`docs/VALIDATION_RESULTS.md`](docs/VALIDATION_RESULTS.md).
-
 ## Method
 
 - Historical benchmark pool: player-seasons with at least `750` minutes and `30` games
@@ -73,9 +71,6 @@ requirements.txt
 .gitignore
 notebooks/
 scripts/
-sql/
-docs/
-data/
 images/
 ```
 
@@ -120,6 +115,7 @@ python scripts/generate_visuals.py
 ## Notes
 
 - The current workflow uses DuckDB only.
+- The `data/` folder is created locally by the build step and is not tracked in git.
 - Team-level results are more stable than player-position results built from raw source flags.
 - The player benchmark is based on box-score production, not possession-level impact measures.
 - Historical team naming variation and some unresolved fact links still exist in the local build.

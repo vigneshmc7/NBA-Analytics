@@ -33,4 +33,3 @@ env/
 
 # Local data and generated outputs
 data/*
-!data/.gitkeep
